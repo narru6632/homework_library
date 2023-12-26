@@ -1,0 +1,500 @@
+package library;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.time.LocalDate;
+import java.util.Scanner;
+
+public class Book {
+	static {
+		try {
+			Class.forName("oracle.jdbc.OracleDriver");
+			String url = "jdbc:oracle:thin:@localhost:1521:xe";
+			String id = "musthave";
+			String pass = "1234";
+
+						
+			Connection con = DriverManager.getConnection(url, id, pass);
+			if (con != null) {
+				System.out.println("Oracle 연결성공");
+			} else {
+				System.out.println("Oracle 연결실패");
+			}
+		} catch (Exception e) {
+			System.out.println("Oracle 연결시 예외발생");
+			e.printStackTrace();
+		}
+	} // Oracle연결, static 종료
+
+	Scanner sc = new Scanner(System.in);
+
+	public void showIdMenu() { // 첫 화면
+		System.out.println("┌────[메뉴 선택]────┐");
+		System.out.println("│1.    로 그 인     │");
+		System.out.println("│2.    회원가입     │");
+		System.out.println("│3.      종료       │");
+		System.out.println("└───────────────────┘");
+		System.out.print("     선택 : ");
+	} 
+
+	Connection con = null;
+	PreparedStatement pstmt1 = null;
+	PreparedStatement pstmt2 = null;
+	PreparedStatement pstmt3 = null;
+	PreparedStatement pstmt4 = null;
+	PreparedStatement pstmt5 = null;
+	PreparedStatement pstmt6 = null;
+	PreparedStatement pstmt7 = null;
+	PreparedStatement pstmt8 = null;
+	PreparedStatement pstmt9 = null;
+	PreparedStatement pstmt10 = null;
+	PreparedStatement pstmt11 = null;
+	PreparedStatement pstmt12 = null;
+	PreparedStatement pstmt13 = null;
+	PreparedStatement pstmt14 = null;
+	PreparedStatement pstmt15 = null;
+	PreparedStatement pstmt16 = null;
+	ResultSet rs = null;
+
+
+	public static void main(String[] args) { // 메인메서드
+		Book bid = new Book();
+		bid.doIdRun();
+	}
+	
+	public void doIdRun() { //첫화면 연결
+		connectDB();	
+		int choice;
+		while(true) {
+			showIdMenu(); // 첫 화면 출력
+			choice = sc.nextInt();
+			sc.nextLine();
+			switch(choice) {
+			case 1:
+				signIn(); //로그인
+				break;
+			case 2:
+				signUp(); //회원가입
+				break;
+			case 3:
+				disconnectDB(); // 종료
+				System.out.println("프로그램을 종료합니다.");
+				System.out.println("이용해주셔서 감사합니다.");
+				return;
+			default:
+				System.out.println("잘못 입력하셨습니다.");
+				break;	
+			}
+		}
+	}
+	
+	public void showAdminMenu() // 사서용 메뉴
+	{
+		System.out.println("┌────[메뉴 선택]────┐");
+		System.out.println("│1.    책 등록      │");
+		System.out.println("│2.    도서조회     │");
+		System.out.println("│3.전체 리스트 조회 │");
+		System.out.println("│4. 낡은 책 버리기  │");
+		System.out.println("│5. 사서 모드 종료  │");
+		System.out.println("└───────────────────┘");
+		System.out.print("     선택 : ");
+	}
+	
+	public void doAdminRun() { // 사서용 메뉴 연결
+		int choice;
+		while(true) {
+			showAdminMenu();
+			choice = sc.nextInt();
+			sc.nextLine();
+			switch(choice) {
+			case 1:
+				addBook();
+				break;
+			case 2:
+				selBook();
+				break;
+			case 3:
+				allBook();
+				break;
+			case 4:
+				delBook();
+				break;
+			case 5:
+				System.out.println("관리자 모드를 종료합니다.");
+				return;
+			default:
+				System.out.println("잘못 입력하셨습니다.");
+				break;	
+			}
+		}
+	}
+	
+	public void showUserMenu() { // 사용자용 메뉴
+		System.out.println("┌────[메뉴 선택]────┐");
+		System.out.println("│1.    도서조회     │");
+		System.out.println("│2.    전체조회     │");
+		System.out.println("│3.      대여       │");
+		System.out.println("│4.      반납       │");
+		System.out.println("│5.    로그아웃     │");
+		System.out.println("└───────────────────┘");
+		System.out.print("     선택 : ");
+	}
+	
+	public void doUserRun() { // 사용자용 메뉴 연결
+		int choice;
+		while(true) {
+			showUserMenu();
+			choice = sc.nextInt();
+			sc.nextLine();
+			switch(choice) {
+			case 1:
+				selBook();
+				break;
+			case 2:
+				allBook();
+				break;
+			case 3:
+				rentBook();
+				break;
+			case 4:
+				returnBook();
+				break;
+			case 5:
+				System.out.println("정상 로그아웃 되었습니다.");
+				return;
+			default:
+				System.out.println("잘못 입력하셨습니다.");
+				break;	
+			}
+		}
+	}
+	
+	public void signIn() { // 로그인
+		System.out.print("ID : ");
+		String id = sc.nextLine();
+		System.out.print("Password : ");
+		String pw = sc.nextLine();
+		try{	
+			String sql = "select * from usersDB where USER_ACCOUNT = ? and USER_PASS = ?";
+			pstmt1 = con.prepareStatement(sql);
+			pstmt1.setString(1, id);
+			pstmt1.setString(2, pw);
+			rs = pstmt1.executeQuery();
+			int nResult = 0;
+			while(rs.next()) {
+				nResult++;
+				rs.getString("user_account");
+				rs.getString("user_pass");
+				System.out.println(rs.getString("user_name")+"님 로그인 완료.");
+				if(id.equals("admin") && pw.equals("1234"))
+				{
+					doAdminRun();
+				}
+				else
+				{
+					doUserRun();								
+				}
+				System.out.println("----------------------------------------");
+			}
+			if (nResult == 0)
+			{
+				System.out.println("아이디 또는 패스워드가 다르거나");
+				System.out.println("등록되어 있지 않은 계정입니다.");
+				System.out.println("----------------------------------------");
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+			System.out.println("입력에 실패했습니다.(#3)");
+		}
+		
+	}//pstmt1 사용
+	
+	
+	
+		public void signUp() { // 회원가입
+			System.out.print("사용할 ID : ");
+			String id = sc.nextLine();
+				try{	
+				String sql = "select * from usersDB where user_account = ?";
+				pstmt10 = con.prepareStatement(sql);
+				pstmt10.setString(1, id);
+				rs = pstmt10.executeQuery();
+				int nResult = 0;
+				while(rs.next()) {
+					nResult++;
+					rs.getString("user_account");
+					System.out.println(rs.getString("user_account")+"는 이미 사용중인 ID입니다.");
+					System.out.println("");
+				}
+				if (nResult == 0)
+				{
+					System.out.println(id+"는 사용 가능한 ID입니다.");
+					System.out.print("Password : ");
+					String pw = sc.nextLine();
+					System.out.print("성함 : ");
+					String name = sc.nextLine();
+					try
+					{
+						String sql2 = "insert into usersDB values(?, ?, ?, ?, ?)";
+						pstmt2 = con.prepareStatement(sql2);
+						pstmt2.setInt(1, 0);
+						pstmt2.setString(2, id);
+						pstmt2.setString(3, pw);
+						pstmt2.setString(4, name);
+						pstmt2.setString(5, "0");
+						int updateCount = pstmt2.executeUpdate();
+					if(updateCount == 1) {
+						System.out.println("회원가입이 정상적으로 처리 되었습니다.");
+					}else {
+						System.out.println("데이터 입력에 실패했습니다.(#가입오류)");
+					}
+					//System.out.println("insertCount : " + updateCount);
+				
+					}catch(Exception e)
+					{
+						e.printStackTrace();
+						System.out.println("데이터 입력에 실패했습니다.(#데이터예외)");
+					}
+				}
+			}catch(Exception e) {
+				e.printStackTrace();
+				System.out.println("입력에 실패했습니다.(#3)");
+			}	
+		}//pstmt2,10
+	
+		public void allBook() { // 전체목록 조회
+			try{	
+				String sql = "select * from booksDB order by book_num";
+				pstmt3 = con.prepareStatement(sql);
+				rs = pstmt3.executeQuery();
+			
+				while(rs.next()) {
+					System.out.println("책번호 : "+rs.getString("book_num"));
+					System.out.println("제  목 : "+rs.getString("book_title"));
+					System.out.println("수  량 : " + rs.getInt("book_each"));
+					System.out.println("----------------------------------------");
+				}
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}//pstmt3
+		
+		public void delBook() { // 책 삭제
+			System.out.print("삭제할 책 제목 : ");
+			String bookTitle = sc.nextLine();
+			try{	
+				String sql = "delete from booksDB where book_title = ?";
+				pstmt4 = con.prepareStatement(sql);
+				pstmt4.setString(1, bookTitle);
+				System.out.println("데이터베이스에서 삭제되었습니다.");
+				int updateCount = pstmt4.executeUpdate();
+				System.out.println("DropCount : " + updateCount);
+			}catch(Exception e) {
+				System.out.println("데이터베이스 삭제 에러입니다.");
+			}
+		}//pstmt4
+	
+		public void addBook() { // 책 등록
+			System.out.print("책 번호 : ");
+			String bookNum = sc.nextLine();
+			System.out.print("제목 : ");
+			String bookTitle = sc.nextLine();
+			System.out.print("권수 : ");
+			int bookEach = sc.nextInt();
+			if (bookEach == 0)
+				bookEach = 0;
+			try
+			{
+				String sql = "insert into booksDB values(?, ?, ?)";
+				pstmt7 = con.prepareStatement(sql);
+				pstmt7.setString(1, bookNum);
+				pstmt7.setString(2, bookTitle);
+				pstmt7.setInt(3, bookEach);
+				int updateCount = pstmt7.executeUpdate();
+			if(updateCount == 1) {
+				System.out.println("데이터가 정상적으로 추가되었습니다.");
+			}else {
+				System.out.println("데이터 입력에 실패했습니다.(#추가오류)");
+			}
+			System.out.println("insertCount : " + updateCount);
+		
+			}catch(Exception e)
+			{
+				e.printStackTrace();
+				System.out.println("데이터 입력에 실패했습니다.(#데이터예외)");
+			}
+		}//psmt7
+		
+		public void selBook() { // 책 조회
+			System.out.print("조회할 책 제목 : ");
+			String bookTitle = sc.nextLine();
+			try{	
+				String sql = "select * from booksDB where book_title = ?";
+				pstmt8 = con.prepareStatement(sql);
+				pstmt8.setString(1, bookTitle);
+				rs = pstmt8.executeQuery();
+				int nResult = 0;
+				while(rs.next()) {
+					nResult++;
+					System.out.println("책번호 : " + rs.getString("book_num"));
+					System.out.println("제  목 : " + rs.getString("book_title"));
+					System.out.println("수  량 : " + rs.getInt("book_each"));
+					System.out.println("----------------------------------------");
+				}
+				if (nResult == 0)
+				{
+					System.out.println("조회할 데이터가 없습니다.");
+					System.out.println("----------------------------------------");
+				}
+			}catch(Exception e) {
+				e.printStackTrace();
+				System.out.println("데이터 입력에 실패했습니다.(#3)");
+			}
+		}//pstmt8
+		
+		public void rentBook()  // 대여
+		{
+			System.out.print("본인확인을 위해 비밀번호를 입력해주세요 : ");
+			String pw = sc.nextLine();
+				
+				try{	
+					String sql = "select * from usersDB where user_pass = ?";
+					pstmt11 = con.prepareStatement(sql);
+					pstmt11.setString(1, pw);
+					rs = pstmt11.executeQuery();
+					int nResult = 0;
+					while(rs.next()) {
+						nResult++;
+						//String line = "(select nvl(max(line)+1,1) from rentalbook)";
+						String account = rs.getString("user_account");
+						LocalDate sysdate = LocalDate.now();
+						LocalDate rentdate = sysdate;
+						LocalDate backdate = sysdate.plusWeeks(1);
+						//String rentday = "TO_DATE(SYSDATE)";
+						//String backday = "TO_DATE(SYSDATE+7)";
+						System.out.print("대여할 도서의 번호를 입력하세요 : ");
+						String bookNum = sc.nextLine(); 
+						
+						try
+						{	
+							sql = "insert into r values(?,?, ?, ?, ?)";
+							pstmt12 = con.prepareStatement(sql);
+							pstmt12.setInt(1, 0);
+							pstmt12.setString(2, bookNum);
+							pstmt12.setString(3, account);
+							pstmt12.setDate(4,java.sql.Date.valueOf(rentdate));
+							pstmt12.setDate(5,java.sql.Date.valueOf(backdate));
+							//pstmt12.setString(5, "select nvl(max(line)+1,1) from rentalbook");
+							System.out.println("");
+							
+							System.out.println("대여가 정상적으로 완료되었습니다");
+							
+//							int updateCount = pstmt12.executeUpdate();
+//							System.out.println("InsertCount : " + updateCount);
+							
+						}catch(Exception e)
+						{
+							e.printStackTrace();
+							System.out.println("입력에 실패했습니다.(#4)");
+						}
+						
+					}
+					if (nResult == 0){
+						System.out.println("회원 정보가 일치하지 않습니다.");
+					}
+				}
+			catch(Exception e) {
+				
+				System.out.println("입력에 실패했습니다.(#3)");
+				e.printStackTrace();
+			}
+		}//psmt11,12
+		
+		
+		
+		public void returnBook() { //반납
+			System.out.print("본인확인을 위해 비밀번호를 입력해주세요 : ");
+			String pw = sc.nextLine();
+				try{	
+					String sql = "select * from usersDB where user_pass = ?";
+					pstmt13 = con.prepareStatement(sql);
+					pstmt13.setString(1, pw);
+					rs = pstmt13.executeQuery();
+					int nResult = 0;
+					while(rs.next()) {
+						nResult++;
+						String account = rs.getString("user_account");
+						System.out.print("반납할 책 번호 입력하세요 : ");
+						String bookNum = sc.nextLine();
+				    	sql = "delete from rentalbook where book_num = ? and user_account = ?";
+	    	
+				    	try {
+				    		pstmt14 = con.prepareStatement(sql);
+							pstmt14.setString(1, bookNum);
+							pstmt14.setString(2, account);
+							System.out.println("반납이 정상처리 되었습니다." );
+							
+//							int updateCount = pstmt14.executeUpdate();
+							//System.out.println("DropCount : " + updateCount);
+							
+				    	}catch(Exception e) {
+				    		System.out.println("반납 에러입니다." );
+				    		e.printStackTrace();
+			    	}if (nResult == 0){
+						System.out.println("회원 정보가 일치하지 않습니다.");
+					}
+				}
+			}catch(Exception e) {
+				
+				System.out.println("입력에 실패했습니다.(#3)");
+				e.printStackTrace();
+			}	//pstmt13,14
+		}
+		
+		
+		public void connectDB() { //오라클 연결
+			try 
+			{
+				con = DriverManager.getConnection(
+						"jdbc:oracle:thin:@localhost:1521:xe",
+						"musthave",
+						"1234");
+			}catch(Exception e){
+				e.printStackTrace();
+			}finally {
+				/*try {
+					if(con != null) con.close();
+				}catch(SQLException sqle) {}*/
+			}
+		}
+		
+		
+		public void disconnectDB() { // 로그아웃
+			try
+			{
+				if(rs != null) rs.close();
+				if(pstmt1 != null) pstmt1.close();
+				if(pstmt2 != null) pstmt2.close();
+				if(pstmt3 != null) pstmt3.close();
+				if(pstmt4 != null) pstmt4.close();
+				if(pstmt5 != null) pstmt5.close();
+				if(pstmt6 != null) pstmt6.close();
+				if(pstmt7 != null) pstmt7.close();
+				if(pstmt8 != null) pstmt8.close();
+				if(pstmt9 != null) pstmt9.close();
+				if(pstmt10 != null) pstmt10.close();
+				if(pstmt11 != null) pstmt11.close();
+				if(pstmt12 != null) pstmt12.close();
+				if(pstmt13 != null) pstmt13.close();
+				if(pstmt14 != null) pstmt14.close();
+				
+				if(con != null) con.close();
+			}catch(Exception e) {
+				
+			}
+		}
+		
+		
+}//끝
