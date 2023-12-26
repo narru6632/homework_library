@@ -367,7 +367,7 @@ public class Book {
 					int nResult = 0;
 					while(rs.next()) {
 						nResult++;
-//						String line = "(select nvl(max(line)+1,1) from rentalbook)";
+						//String line = "(select nvl(max(line)+1,1) from rentalbook)";
 						String account = rs.getString("user_account");
 						LocalDate sysdate = LocalDate.now();
 						LocalDate rentdate = sysdate;
